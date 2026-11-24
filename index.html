@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fotosyntes hos vattenpest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Figtree:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm lab notebook for 17-year-olds, plain words, one clear number
+   IDEA: the classic school lab bench – beaker, funnel, lamp – that you can actually run
+   PICTURE: the beaker scene itself, large, with live O2 bubbles and coloured light cone
+   COLOUR and TYPE: white bench, Elodea green dominant, water blue support, lamp colour as accent; Figtree + Atkinson Hyperlegible
+   LAYOUT: scene left, controls and meter right; log table full width below; stacks under 900px */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0e1512);--panel:light-dark(#f3f7f4,#16211c);--ink:light-dark(#14211a,#e6efe9);--mute:light-dark(#55665c,#9fb2a7);
+--line:light-dark(#d5e0d9,#2a3a32);--leaf:light-dark(#2f8f3e,#56b866);--leaf2:light-dark(#1f6b2c,#3f9a4f);--water:light-dark(#dcefff,#12304a);
+--glass:light-dark(#9bb3c4,#5d7a8f);--acc:#2f8f3e;--warn:light-dark(#a35a00,#f0b35a);--stop:light-dark(#b3261e,#ff8a80)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,16px);max-width:1240px;margin:0 auto}
+h1{font:800 clamp(28px,3.6vw,40px)/1.05 Figtree,sans-serif;margin:0 0 6px;text-wrap:balance}
+h2{font:800 20px/1.2 Figtree,sans-serif;margin:0 0 12px}
+.lede{color:var(--mute);margin:0 0 20px;max-width:68ch}
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.scene{background:var(--panel);border-radius:18px;padding:8px}
+.scene svg{display:block;width:100%;height:auto}
+.note{font-size:13px;color:var(--mute);margin:8px 10px 4px}
+.ctl{margin-bottom:22px}
+.ctl label,.lbl{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-weight:700}
+.val{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--leaf2)}
+input[type=range]{width:100%;height:44px;accent-color:var(--leaf);margin:0;cursor:pointer}
+input[type=range]:disabled{opacity:.35;cursor:not-allowed}
+input:focus-visible,button:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
+.spec{position:relative;height:16px;border-radius:8px}
+.spec .mk{position:absolute;top:-4px;width:4px;height:24px;margin-left:-2px;background:var(--ink);border-radius:2px}
+.ticks{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:4px}
+.curve{display:block;width:100%;height:46px;margin-bottom:2px}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:700;cursor:pointer;margin-top:6px}
+.chk input{width:22px;height:22px;accent-color:var(--leaf)}
+.meter{background:var(--panel);border-radius:18px;padding:18px 20px;margin-bottom:14px}
+.meter .big{font:800 clamp(44px,7vw,64px)/1 Figtree,sans-serif;font-variant-numeric:tabular-nums}
+.meter .unit{font-size:17px;color:var(--mute);font-weight:700}
+.fac{display:grid;grid-template-columns:9.5em minmax(0,1fr) 3.2em;gap:10px;align-items:center;font-size:14px;margin-top:10px}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--leaf);transition:width .3s}
+.bar.lim i{background:var(--warn)}
+.fac b{text-align:right;font-variant-numeric:tabular-nums}
+.msg{border-left:5px solid var(--leaf);background:var(--panel);border-radius:0 12px 12px 0;padding:12px 16px;margin-bottom:18px;min-height:3.4em}
+.msg.warn{border-color:var(--warn)}.msg.stop{border-color:var(--stop)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+button{font:700 16px "Atkinson Hyperlegible",sans-serif;min-height:44px;padding:0 18px;border-radius:12px;border:2px solid var(--leaf);background:var(--leaf);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button:disabled{opacity:.4;cursor:default}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:14px;color:var(--mute)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{color:var(--mute);padding:18px;background:var(--panel);border-radius:12px}
+.scroll{overflow-x:auto}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<div id="root"><div class="band"><h1>Fotosyntes hos vattenpest</h1><p class="lede">Laddar simuleringen…</p></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+{
+const {useState,useEffect,useRef,useMemo}=React;
+const html=htm.bind(React.createElement);
+
+/* ---------- Biologisk modell ---------- */
+const g=(x,m,s)=>Math.exp(-(((x-m)/s)**2));
+// Relativ absorption/verkningsspektrum (0–1): klorofyll a/b + karotenoider
+const absorb=(wl,white)=>white?0.85:Math.min(1,0.03+1.0*g(wl,440,35)+0.35*g(wl,480,30)+0.9*g(wl,662,40));
+// Ljusfaktor: mättnadskurva, planar ut runt 70–80 % ljusstyrka
+const lightF=(I,A)=>I<=0?0:(1-Math.exp(-I*A/20))/(1-Math.exp(-5));
+// Temperaturfaktor: enzymkinetik, optimum 25–31 °C, denaturering över 35 °C, 0 vid 45 °C
+const tempF=t=>{if(t>=45)return 0;if(t<25)return 0.05+0.95*((Math.max(t,0)/25)**1.5);if(t<=31)return 1;return ((45-t)/14)**2};
+// Begränsande faktorer (Blackman): mjukt minimum av ljus- och mörkerreaktionernas kapacitet
+const smin=(a,b)=>a<=0||b<=0?0:(a**-6+b**-6)**(-1/6);
+
+function model(t,I,wl,white){
+  const A=absorb(wl,white),L=Math.min(1,lightF(I,A)),T=tempF(t);
+  const rate=Math.min(60,Math.round(60*smin(L,T)/smin(1,1)));
+  let msg,tone="ok",lim="–";
+  const green=!white&&wl>=495&&wl<=580;
+  if(I===0){msg="Inget ljus – utan ljusenergi kan ljusreaktionerna inte ske, så ingen syrgas bildas.";tone="stop";lim="Ljusstyrka"}
+  else if(t>=45){msg="Enzymerna i calvincykeln (t.ex. Rubisco) har denaturerat – fotosyntesen har upphört helt.";tone="stop";lim="Temperatur"}
+  else if(t>35){msg="Enzymerna denaturerar vid för hög temperatur – takten sjunker snabbt över 35 °C.";tone="warn";lim="Temperatur"}
+  else if(green&&A<0.25){msg="Grönt ljus reflekteras av klorofyllet – låg energiupptagning.";tone="warn";lim="Våglängd"}
+  else if(!white&&A<0.3){msg=`Klorofyll absorberar dåligt vid ${wl} nm – låg energiupptagning. Prova blått (~440 nm) eller rött (~660 nm).`;tone="warn";lim="Våglängd"}
+  else if(I>=70&&L>0.95){msg=T<0.9?"Ljusmättnad: ökad ljusstyrka ger inte högre takt vid denna temperatur – enzymerna är begränsande.":"Ljusmättnad nära optimal temperatur – nu begränsar andra faktorer, t.ex. tillgången på koldioxid.";tone=T<0.9?"warn":"ok";lim=T<0.9?"Temperatur":"CO₂ (övrigt)"}
+  else if(L<T*0.92){
+    if(!white&&A<0.6){msg=`Klorofyll absorberar bara delvis vid ${wl} nm – ljuset begränsar. Blått och rött ljus ger mest.`;lim="Våglängd"}
+    else{msg="Ljuset är begränsande faktor – mer ljus ger snabbare ljusreaktioner och fler bubblor.";lim="Ljusstyrka"}
+    tone="warn"}
+  else if(T<L*0.92){msg=t<10?"Låg temperatur: enzymerna i calvincykeln arbetar mycket långsamt och begränsar takten.":"Temperaturen begränsar: enzymerna i calvincykeln hinner inte använda all energi från ljusreaktionerna.";tone="warn";lim="Temperatur"}
+  else{msg=T>0.95&&L>0.9?"Nära optimala förhållanden – både ljus och temperatur ligger nära sina maxvärden.":"Ljus och temperatur begränsar ungefär lika mycket – ändra en faktor i taget.";lim=T>0.95&&L>0.9?"–":"Ljus + temperatur"}
+  return {A,L,T,rate,msg,tone,lim};
+}
+
+/* ---------- Våglängd → färg ---------- */
+function wlRGB(w){
+  let r=0,g2=0,b=0;
+  if(w<440){r=-(w-440)/60;b=1}else if(w<490){g2=(w-440)/50;b=1}else if(w<510){g2=1;b=-(w-510)/20}
+  else if(w<580){r=(w-510)/70;g2=1}else if(w<645){r=1;g2=-(w-645)/65}else r=1;
+  let f=w<420?0.3+0.7*(w-400)/20:w>680?0.3+0.7*(700-w)/20:1;f=Math.max(f,.3);
+  return `rgb(${Math.round(255*Math.pow(r*f,.8))},${Math.round(255*Math.pow(g2*f,.8))},${Math.round(255*Math.pow(b*f,.8))})`;
+}
+const SPEC="linear-gradient(90deg,"+Array.from({length:13},(_,i)=>{const w=400+i*25;return `${wlRGB(w)} ${(i/12*100).toFixed(1)}%`}).join(",")+")";
+const CURVE=Array.from({length:61},(_,i)=>{const w=400+i*5;return `${i?'L':'M'}${(i/60*300).toFixed(1)} ${(44-40*absorb(w,false)).toFixed(1)}`}).join(" ");
+
+/* ---------- Scen ---------- */
+const STEM_X=y=>320+10*Math.sin((y-325)/38);
+const WHORLS=Array.from({length:9},(_,i)=>325+i*14);
+const GAS_TOP=46;
+
+function Scene({rate,light,wl,white,temp}){
+  const [,setTick]=useState(0);
+  const st=useRef({bubbles:[],next:0,gas:6,last:0,id:0});
+  const rateRef=useRef(rate);rateRef.current=rate;
+  useEffect(()=>{
+    let raf,reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const loop=now=>{
+      const s=st.current;const dt=Math.min(.05,(now-(s.last||now))/1000);s.last=now;
+      const r=rateRef.current;
+      if(r>0){const iv=60/r;
+        if(!s.next||s.next-now>iv*1200)s.next=now+iv*1000*(.3+.4*Math.random());
+        if(now>=s.next){s.bubbles.push({id:s.id++,y:318,x:STEM_X(318),r:2.6+Math.random()*1.8,ph:Math.random()*6,v:40});s.next=now+iv*1000*(.8+.4*Math.random())}
+      } else s.next=0;
+      const surf=GAS_TOP+s.gas;
+      s.bubbles.forEach(b=>{b.v=Math.min(110,b.v+60*dt);b.y-=b.v*dt*(reduce?3:1);const nx=b.y>300?STEM_X(318):320;b.x=nx+(b.y<300?2.5*Math.sin(b.y/9+b.ph):0)});
+      const before=s.bubbles.length;s.bubbles=s.bubbles.filter(b=>b.y>surf+b.r);
+      s.gas=Math.min(110,s.gas+0.35*(before-s.bubbles.length));
+      setTick(x=>x+1);raf=requestAnimationFrame(loop)};
+    raf=requestAnimationFrame(loop);return()=>cancelAnimationFrame(raf)},[]);
+  const s=st.current;
+  const col=white?"#fff6d6":wlRGB(wl);
+  const op=light===0?0:0.1+0.5*light/100;
+  const thermo=440-Math.max(0,Math.min(50,temp))/50*120;
+  return html`<div class="scene">
+  <svg viewBox="0 0 520 510" role="img" aria-label="Bägare med vattenpest under en glastratt, belyst av en lampa. Syrgasbubblor stiger från stjälkens snittyta.">
+    <defs>
+      <linearGradient id="cone" x1="0" x2="1"><stop offset="0" stop-color=${col} stop-opacity=${op}/><stop offset="1" stop-color=${col} stop-opacity=${op*0.35}/></linearGradient>
+      <radialGradient id="glow"><stop offset="0" stop-color=${col} stop-opacity=${light?0.9:0}/><stop offset="1" stop-color=${col} stop-opacity="0"/></radialGradient>
+      <linearGradient id="glassG" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".15" stop-color="#fff" stop-opacity="0"/><stop offset=".9" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".25"/></linearGradient>
+    </defs>
+    <rect x="0" y="488" width="520" height="22" fill="var(--line)"/>
+    <!-- lampa -->
+    <rect x="40" y="300" width="10" height="188" fill="var(--mute)"/><rect x="14" y="478" width="62" height="12" rx="4" fill="var(--mute)"/>
+    <path d="M30 248 L96 232 L112 254 L112 300 L96 322 L30 306 Z" fill="var(--ink)" opacity=".85"/>
+    <circle cx="113" cy="277" r="30" fill="url(#glow)"/>
+    <rect x="108" y="254" width="7" height="46" rx="3" fill=${light?col:"#666"}/>
+    <polygon points="115,256 115,298 330,478 330,300" fill="url(#cone)"/>
+    <text x="22" y="230" font-size="14" fill="var(--mute)" font-family="Atkinson Hyperlegible">Lampa</text>
+    <!-- bägare + vatten -->
+    <path d="M180 170 L180 470 Q180 486 196 486 L454 486 Q470 486 470 470 L470 170" fill="none" stroke="var(--glass)" stroke-width="3"/>
+    <path d="M182 196 L182 470 Q182 484 196 484 L454 484 Q468 484 468 470 L468 196 Z" fill="var(--water)" opacity=".85"/>
+    <rect x="182" y="196" width="286" height="288" fill="url(#glassG)"/>
+    <path d="M182 196 Q250 192 325 196 T468 196" fill="none" stroke="var(--glass)" stroke-width="1.5"/>
+    <!-- termometer -->
+    <rect x="436" y="310" width="12" height="140" rx="6" fill="var(--bg)" stroke="var(--glass)" stroke-width="1.5"/>
+    <rect x="439" y=${thermo} width="6" height=${448-thermo} rx="3" fill="#d9483b"/><circle cx="442" cy="452" r="8" fill="#d9483b"/>
+    <!-- stöd -->
+    <rect x="236" y="464" width="22" height="20" fill="var(--glass)" opacity=".7"/><rect x="384" y="464" width="22" height="20" fill="var(--glass)" opacity=".7"/>
+    <!-- vattenpest -->
+    <path d=${"M"+WHORLS.concat([460]).map(y=>`${STEM_X(y).toFixed(1)} ${y}`).join(" L")} stroke="var(--leaf2)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    ${WHORLS.map((y,i)=>{const x=STEM_X(y),sz=1-i*0.03;return html`<g key=${y} transform=${`translate(${x} ${y})`}>
+      ${[-58,0,58].map(a=>html`<ellipse key=${a} cx="0" cy="-11" rx=${3.4*sz} ry=${11*sz} fill="var(--leaf)" transform=${`rotate(${a+(i%2?180:180)+(i%2?20:-20)})`}/>`)}
+    </g>`})}
+    <ellipse cx=${STEM_X(318)} cy="318" rx="3" ry="1.6" fill="#b7e4bf"/>
+    <!-- tratt + provrör -->
+    <path d="M226 464 L310 316 L310 200 M418 464 L334 316 L334 200" fill="none" stroke="var(--glass)" stroke-width="3"/>
+    <path d="M226 464 L310 316 L334 316 L418 464 Z" fill="#fff" opacity=".08"/>
+    <path d="M300 236 L300 52 Q300 36 322 36 Q344 36 344 52 L344 236" fill="none" stroke="var(--glass)" stroke-width="3"/>
+    <path d="M303 ${GAS_TOP+s.gas} L303 52 Q303 39 322 39 Q341 39 341 52 L341 ${GAS_TOP+s.gas} Z" fill="var(--bg)" opacity=".85"/>
+    <rect x="303" y=${GAS_TOP+s.gas} width="38" height=${236-GAS_TOP-s.gas} fill="var(--water)" opacity=".9"/>
+    <line x1="303" x2="341" y1=${GAS_TOP+s.gas} y2=${GAS_TOP+s.gas} stroke="var(--glass)" stroke-width="1.5"/>
+    <!-- bubblor -->
+    ${s.bubbles.map(b=>html`<circle key=${b.id} cx=${b.x.toFixed(1)} cy=${b.y.toFixed(1)} r=${b.r} fill="#ffffff" fill-opacity=".75" stroke="var(--glass)" stroke-width="1"/>`)}
+    <!-- etiketter -->
+    <g font-family="Atkinson Hyperlegible" font-size="14" fill="var(--ink)">
+      <text x="356" y="80">O₂ samlas</text><line x1="352" y1="76" x2="342" y2="76" stroke="var(--mute)"/>
+      <text x="356" y="270">Glastratt</text><line x1="352" y1="266" x2="336" y2="266" stroke="var(--mute)"/>
+      <text x="350" y="356">Snittyta</text><line x1="346" y1="352" x2="328" y2="322" stroke="var(--mute)"/>
+      <text x="196" y="418">Vattenpest</text><line x1="246" y1="424" x2="302" y2="430" stroke="var(--mute)"/>
+      <text x="196" y="186" fill="var(--mute)">Vatten med NaHCO₃ (CO₂-källa)</text>
+      <text x="404" y="304" fill="var(--mute)">${temp} °C</text>
+    </g>
+  </svg>
+  <p class="note">Bubblorna stiger i realtid – räkna dem gärna med ett stoppur och jämför med mätaren.</p>
+  </div>`;
+}
+
+/* ---------- App ---------- */
+function Slider({id,label,value,min,max,step,unit,onChange,disabled}){
+  return html`<div class="ctl"><label for=${id}>${label}<span class="val">${disabled?"—":value+" "+unit}</span></label>
+  <input id=${id} type="range" min=${min} max=${max} step=${step} value=${value} disabled=${disabled} onInput=${e=>onChange(+e.target.value)} onChange=${e=>onChange(+e.target.value)}/></div>`;
+}
+
+function App(){
+  const [temp,setTemp]=useState(20),[light,setLight]=useState(50),[wl,setWl]=useState(660),[white,setWhite]=useState(false);
+  const [log,setLog]=useState([]),[copied,setCopied]=useState("");
+  const m=useMemo(()=>model(temp,light,wl,white),[temp,light,wl,white]);
+  const add=()=>setLog(l=>[...l,{n:l.length+1,temp,light,wl:white?"Vitt":wl+" nm",rate:m.rate,lim:m.lim}]);
+  const copy=async()=>{const t=["Nr\tTemperatur (°C)\tLjusstyrka (%)\tVåglängd\tBubblor/min\tBegränsande faktor",...log.map(r=>[r.n,r.temp,r.light,r.wl,r.rate,r.lim].join("\t"))].join("\n");
+    try{await navigator.clipboard.writeText(t);setCopied("Kopierat – klistra in i ett kalkylark.")}catch(e){setCopied("Kunde inte kopiera – markera tabellen och kopiera manuellt.")}};
+  const limL=m.L<m.T, limT=m.T<m.L;
+  return html`<div class="band">
+    <h1>Fotosyntes hos vattenpest</h1>
+    <p class="lede">Ändra temperatur, ljusstyrka och våglängd och se hur mycket syrgas (O₂) vattenpesten (<i>Elodea</i>) producerar. Ändra en faktor i taget och logga dina mätpunkter.</p>
+    <div class="grid">
+      <${Scene} rate=${m.rate} light=${light} wl=${wl} white=${white} temp=${temp}/>
+      <div>
+        <div class="meter" aria-live="polite">
+          <div class="lbl" >Syrgasproduktion</div>
+          <div><span class="big">${m.rate}</span> <span class="unit">bubblor/minut</span></div>
+          <div class="fac"><span>Ljus (absorberat)</span><div class=${"bar"+(limL?" lim":"")}><i style=${{width:(m.L*100)+"%"}}></i></div><b>${Math.round(m.L*100)} %</b></div>
+          <div class="fac"><span>Enzymer (temp.)</span><div class=${"bar"+(limT?" lim":"")}><i style=${{width:(m.T*100)+"%"}}></i></div><b>${Math.round(m.T*100)} %</b></div>
+        </div>
+        <div class=${"msg "+(m.tone==="ok"?"":m.tone)} aria-live="polite">${m.msg}</div>
+        <${Slider} id="temp" label="Temperatur" value=${temp} min=${0} max=${50} step=${1} unit="°C" onChange=${setTemp}/>
+        <${Slider} id="light" label="Ljusstyrka" value=${light} min=${0} max=${100} step=${1} unit="%" onChange=${setLight}/>
+        <${Slider} id="wl" label="Våglängd" value=${wl} min=${400} max=${700} step=${5} unit="nm" onChange=${setWl} disabled=${white}/>
+        <div style=${{opacity:white?.4:1,marginTop:"-14px"}}>
+          <svg class="curve" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"><path d=${CURVE} fill="none" stroke="var(--leaf2)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+          <div class="spec" style=${{background:SPEC}}>${!white&&html`<span class="mk" style=${{left:((wl-400)/3)+"%"}}></span>`}</div>
+          <div class="ticks"><span>400 violett</span><span>blått</span><span>grönt</span><span>gult</span><span>rött 700</span></div>
+          <p class="note" style=${{margin:"4px 0 0"}}>Kurvan visar klorofyllets relativa absorption: toppar i blått (~440 nm) och rött (~660 nm).</p>
+        </div>
+        <label class="chk"><input type="checkbox" checked=${white} onChange=${e=>setWhite(e.target.checked)}/> Vitt ljus (fullspektrum)</label>
+        <div class="btns" style=${{marginTop:"14px"}}><button onClick=${add}>Logga mätpunkt</button>
+          <button class="ghost" onClick=${()=>{setTemp(20);setLight(50);setWl(660);setWhite(false)}}>Återställ reglage</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="band" style=${{paddingTop:0}}>
+    <h2>Mätdata</h2>
+    ${log.length===0?html`<div class="empty">Inga mätpunkter ännu. Tryck på ”Logga mätpunkt” för att spara nuvarande inställningar.</div>`:html`
+    <div class="scroll"><table class="stack"><thead><tr><th class="n">Nr</th><th class="n">Temperatur</th><th class="n">Ljusstyrka</th><th class="n">Våglängd</th><th class="n">Bubblor/min</th><th>Begränsande faktor</th></tr></thead>
+    <tbody>${log.map(r=>html`<tr key=${r.n}><td class="n">${r.n}</td><td class="n">${r.temp} °C</td><td class="n">${r.light} %</td><td class="n">${r.wl}</td><td class="n"><b>${r.rate}</b></td><td>${r.lim}</td></tr>`)}</tbody></table></div>`}
+    <div class="btns" style=${{marginTop:"12px"}}>
+      <button class="ghost" disabled=${!log.length} onClick=${copy}>Kopiera tabell</button>
+      <button class="ghost" disabled=${!log.length} onClick=${()=>setLog(l=>l.slice(0,-1))}>Ångra senaste</button>
+      <button class="ghost" disabled=${!log.length} onClick=${()=>{setLog([]);setCopied("")}}>Rensa tabell</button>
+    </div>
+    ${copied&&html`<p class="note" style=${{marginLeft:0}}>${copied}</p>`}
+    <p class="note" style=${{marginLeft:0}}>Modellen är förenklad men följer verkliga principer: absorptionsspektrum, ljusmättnad, enzymernas temperaturoptimum och lagen om begränsande faktorer.</p>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+}
+</script>
+</body>
+</html>
